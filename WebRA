@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Instant Tracking with Three.js and AR.js</title>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://raw.githack.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+const arToolkitSource = new THREEx.ArToolkitSource({
+    sourceType: 'webcam',
+});
+
+arToolkitSource.init(() => {
+    setTimeout(() => {
+        arToolkitSource.onResize();
+        arToolkitSource.copySizeTo(renderer.domElement);
+    }, 2000);
+});
+
+const arToolkitContext = new THREEx.ArToolkitContext({
+    cameraParametersUrl: 'data/camera_para.dat',
+    detectionMode: 'mono',
+});
+
+arToolkitContext.init(() => {
+    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+});
+
+const markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
+    type: 'pattern',
+    patternUrl: 'data/pattern-marker.patt',
+});
+
+scene.add(markerControls.markerObject);
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+cube.position.y = 0.5;
+//scene.add(cube);
+function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+animate();
+
+    </script>
+</body>
+</html>
